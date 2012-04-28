@@ -42,6 +42,17 @@ char S[8][64] = {                        // 1 origin
      2,  1, 14,  7,  4, 10,  8, 13, 15, 12,  9,  0,  3,  5,  6, 11, },
 };
 
+void SnTransform(int n, char* preS, char* postS){
+  int row    = preS[0] * 2 + preS[5];
+  int column = preS[1] * 8 + preS[2] * 4 + preS[3] * 2 + preS[4];
+  int value  = S[n][row*16+column];
+  int bit = 8;
+  for (int i = 0; i < 4; i++) {
+    postS[i] = ( value & bit ) ? 1 : 0;
+    bit >>= 1;
+  }
+}
+
 int main(int argc, char* argv[]) {
   char L[8];
   char R[8];
@@ -57,16 +68,10 @@ int main(int argc, char* argv[]) {
   for (int i = 0; i < 12; i++) {
     preS[i] ^= K[i];  // work xor K
   }
-  int row    = preS[0] * 2 + preS[5];
-  int column = preS[1] * 8 + preS[2] * 4 + preS[3] * 2 + preS[4];
-  printf("row=%d column=%d\n",row, column);
-  int value = S[0][row*16+column];
-  printf("value=%d\n", value);
-  int bit = 8;
-  for (int i = 0; i < 4; i++) {
-    postS[i] = ( value & bit ) ? 1 : 0;
-    bit >>= 1;
-    printf("%d",postS[i]);
+  SnTransform(0, &preS[0], &postS[0]);
+  SnTransform(1, &preS[6], &postS[4]);
+  for (int i = 0; i < 8; i++) {
+    printf("%d", postS[i]);
   }
   printf("\n");
 }
