@@ -1,9 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 enum eType {
   eEncrypt,
   eDecrypt,
+};
+
+enum eMode {
+  eECB,
+  eCBC,
+  eCFB,
+  eOFB,
 };
 
 char K[] = { 1,0,1,0,1,0,1,0,1,0,1,0 };
@@ -66,20 +74,30 @@ void des_like(char* l, char* r, int num, eType type) {
   if (type == eEncrypt) { swap_array(l, r, 8); }
 }
 
+void read_vector_from_argv(char* vec, char* arg) {
+  for(int i = 0; i < 8; i++){
+    vec[i] = arg[i] - '0';
+  }
+}
+
 int main(int argc, char* argv[]) {
   char L[8];
   char R[8];
-  if (argc == 3) {
-    for(int i = 0; i < 8; i++){
-      L[i] = argv[1][i] - '0';
-      R[i] = argv[2][i] - '0';
+  char IV[8];
+  eMode mode = eECB;
+  if ((argc == 3)||(argc == 4)){
+    read_vector_from_argv(L, &argv[1][0]);
+    read_vector_from_argv(R, &argv[2][0]);
+    if (argc == 4) { // optional
+      if (strncmp(argv[3], "CBC:", 4) == 0){ mode = eCBC; }
+      if (mode != eECB){ read_vector_from_argv(IV, &argv[3][4]); }
     }
   }else{
-    printf("usage:\n  des_like 00000000 11111111\n");
+    printf("usage:\n  des_like 00000000 11111111 [CBC:01010101]\n");
     exit(0);
   }
   des_like(L, R, 8, eEncrypt);
-  print_result(L, R, 8, "P:");
+  print_result(L, R, 8, "Encrypt:");
   des_like(L, R, 8, eDecrypt);
-  print_result(L, R, 8, "C:");
+  print_result(L, R, 8, "Decrypt:");
 }
