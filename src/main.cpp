@@ -1,10 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-// Plain Text
-char data[][8] = {
-  { 0,1,1,0,0,0,0,1 },
-  { 0,1,0,0,0,0,1,0 },
- }; // "aB" (97,66)
 char K[] = { 1,0,1,0,1,0,1,0,1,0,1,0 };
 char E[] = { 2,1,2,3,4,5,4,5,6,7,8,1 };  // 1 origin
 char S[8][64] = {                        // 1 origin
@@ -81,7 +77,7 @@ void print_result(char* l, char* r, int num) {
   for (int i = 0; i < num; i++) {
     printf("%d", l[i]);
   }
-  printf("\n");
+  printf(" ");
   printf("R=");
   for (int i = 0; i < num; i++) {
     printf("%d", r[i]);
@@ -113,9 +109,15 @@ void des_like(char* l, char* r, int num, eType type) {
 int main(int argc, char* argv[]) {
   char L[8];
   char R[8];
-  for (int i = 0; i < 8; i++){
-    L[i] = data[0][i];
-    R[i] = data[1][i];
+  if (argc == 3) {
+    for(int i = 0; i < 8; i++){
+      L[i] = argv[1][i] - '0';
+      R[i] = argv[2][i] - '0';
+    }
+  }else{
+    printf("usage:\n");
+    printf("  des_like 00000000 11111111\n");
+    exit(0);
   }
   des_like(L, R, 8, eEncrypt);
   print_result(L, R, 8);
