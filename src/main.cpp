@@ -44,6 +44,11 @@ char S[8][64] = {                        // 1 origin
 
 char P[] = { 7, 8, 2, 1, 4, 6, 5, 3 };  // 1 origin
 
+enum eType {
+  eEncrypt,
+  eDecrypt,
+};
+
 void s_transform(int n, char* preS, char* postS){
   int row    = preS[0]*2 + preS[5];
   int column = preS[1]*8 + preS[2]*4 + preS[3]*2 + preS[4];
@@ -71,7 +76,7 @@ void feistel_function(char* out_R, char* in_R) {
   }
 }
 
-void print_result(char* l, char* r, int num){
+void print_result(char* l, char* r, int num) {
   printf("L=");
   for (int i = 0; i < num; i++) {
     printf("%d", l[i]);
@@ -84,6 +89,27 @@ void print_result(char* l, char* r, int num){
   printf("\n");
 }
 
+void swap_array(char* l, char* r, int num) {
+  for (int i =0 ; i < num; i++){
+    char temp = r[i];
+    r[i] = l[i];
+    l[i] = temp;
+  }
+}
+
+void des_like(char* l, char* r, int num, eType type) {
+  if (type == eDecrypt) {
+    swap_array(l, r, 8);
+  }
+  char postF[8];
+  feistel_function(postF, r);
+  for (int i = 0; i < 8; i++) { postF[i] ^= l[i]; }
+  for (int i = 0; i < 8; i++) { l[i] = postF[i];  }
+  if (type == eEncrypt){
+    swap_array(l, r, 8);
+  }
+}
+
 int main(int argc, char* argv[]) {
   char L[8];
   char R[8];
@@ -91,15 +117,8 @@ int main(int argc, char* argv[]) {
     L[i] = data[0][i];
     R[i] = data[1][i];
   }
-  char postF[8];
-  feistel_function(postF, R);
-  for (int i = 0; i < 8; i++) {
-    postF[i] ^= L[i];
-  }
-  for (int i =0 ; i < 8 ; i++){
-    char temp = R[i];
-    R[i] = postF[i];
-    L[i] = temp;
-  }
+  des_like(L, R, 8, eEncrypt);
+  print_result(L, R, 8);
+  des_like(L, R, 8, eDecrypt);
   print_result(L, R, 8);
 }
