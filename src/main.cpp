@@ -35,16 +35,18 @@ char S[8][64] = {                        // 1 origin
   {  4, 11,  2, 14, 15,  0,  8, 13,  3, 12,  9,  7,  5, 10,  6,  1,
     13,  0, 11,  7,  4,  9,  1, 10, 14,  3,  5, 12,  2, 15,  8,  6,
      1,  4, 11, 13, 12,  3,  7, 14, 10, 15,  6,  8,  0,  5,  9,  2,
-     6, 11, 13,  8,  1,  4, 10,  7,  9,  5,  0, 15, 14,  2,  3, 12, },        
+     6, 11, 13,  8,  1,  4, 10,  7,  9,  5,  0, 15, 14,  2,  3, 12, },
   { 13,  2,  8,  4,  6, 15, 11,  1, 10,  9,  3, 14,  5,  0, 12,  7,
      1, 15, 13,  8, 10,  3,  7,  4, 12,  5,  6, 11,  0, 14,  9,  2,
      7, 11,  4,  1,  9, 12, 14,  2,  0,  6, 10, 13, 15,  3,  5,  8,
      2,  1, 14,  7,  4, 10,  8, 13, 15, 12,  9,  0,  3,  5,  6, 11, },
 };
 
-void SnTransform(int n, char* preS, char* postS){
-  int row    = preS[0] * 2 + preS[5];
-  int column = preS[1] * 8 + preS[2] * 4 + preS[3] * 2 + preS[4];
+char P[] = { 7, 8, 2, 1, 4, 6, 5, 3 };  // 1 origin
+
+void s_transform(int n, char* preS, char* postS){
+  int row    = preS[0]*2 + preS[5];
+  int column = preS[1]*8 + preS[2]*4 + preS[3]*2 + preS[4];
   int value  = S[n][row*16+column];
   int bit = 8;
   for (int i = 0; i < 4; i++) {
@@ -56,22 +58,38 @@ void SnTransform(int n, char* preS, char* postS){
 int main(int argc, char* argv[]) {
   char L[8];
   char R[8];
-  char preS[12];
-  char postS[8];
   for (int i = 0; i < 8; i++){
     L[i] = data[0][i];
     R[i] = data[1][i];
   }
+  char preS[12];
   for (int i = 0; i < 12; i++) {
-    preS[i] = R[ E[i] - 1 ];  // extension E
+    preS[i] = R[ E[i]-1 ];  // extension E
   }
   for (int i = 0; i < 12; i++) {
     preS[i] ^= K[i];  // work xor K
   }
-  SnTransform(0, &preS[0], &postS[0]);
-  SnTransform(1, &preS[6], &postS[4]);
+  char postS[8];
+  s_transform(0, &preS[0], &postS[0]);
+  s_transform(1, &preS[6], &postS[4]);
+  char postP[8];
   for (int i = 0; i < 8; i++) {
-    printf("%d", postS[i]);
+    postP[i]  = postS[ P[i]-1 ];
+    postP[i] ^= L[i];
+  }
+  for (int i =0 ; i < 8 ; i++){
+    char temp = R[i];
+    R[i] = postP[i];
+    L[i] = temp;
+  }
+  printf("L=");
+  for (int i = 0; i < 8; i++) {
+    printf("%d", L[i]);
+  }
+  printf("\n");
+  printf("R=");
+  for (int i = 0; i < 8; i++) {
+    printf("%d", R[i]);
   }
   printf("\n");
 }
