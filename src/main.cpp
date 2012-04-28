@@ -9,7 +9,7 @@ enum eType {
 char K[] = { 1,0,1,0,1,0,1,0,1,0,1,0 };
 char E[] = { 2,1,2,3,4,5,4,5,6,7,8,1 };  // 1 origin
 char P[] = { 7,8,2,1,4,6,5,3 };          // 1 origin
-char S[2][64] = {                        // 1 origin
+char S[2][64] = {                        // 0 origin
   { 14,  4, 13,  1,  2, 15, 11,  8,  3, 10,  6, 12,  5,  9,  0,  7,
      0, 15,  7,  4, 14,  2, 13,  1, 10,  6, 12, 11,  9,  5,  3,  8,
      4,  1, 14,  8, 13,  6,  2, 11, 15, 12,  9,  7,  3, 10,  5,  0,
@@ -34,17 +34,17 @@ void s_transform(int n, char* preS, char* postS){
 void feistel_function(char* out_R, char* in_R) {
   char preS[12];
   for (int i = 0; i < 12; i++) { preS[i] = in_R[ E[i]-1 ]; }  // extension E
-  for (int i = 0; i < 12; i++) { preS[i] ^= K[i];          }  // work xor K
+  for (int i = 0; i < 12; i++) { preS[i] ^= K[i];          }  // xor K
   char postS[8];
   s_transform(0, &preS[0], &postS[0]);
   s_transform(1, &preS[6], &postS[4]);
   for (int i = 0; i < 8; i++) { out_R[i] = postS[ P[i]-1 ]; }
 }
 
-void print_result(char* l, char* r, int num) {
-  printf("L=");
+void print_result(char* l, char* r, int num, char* text) {
+  printf("%s", text);
   for (int i = 0; i < num; i++) { printf("%d", l[i]); }
-  printf(" R=");
+  printf(" ");
   for (int i = 0; i < num; i++) { printf("%d", r[i]); }
   printf("\n");
 }
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
   des_like(L, R, 8, eEncrypt);
-  print_result(L, R, 8);
+  print_result(L, R, 8, "P:");
   des_like(L, R, 8, eDecrypt);
-  print_result(L, R, 8);
+  print_result(L, R, 8, "C:");
 }
