@@ -55,6 +55,35 @@ void s_transform(int n, char* preS, char* postS){
   }
 }
 
+void feistel_function(char* out_R, char* in_R) {
+  char preS[12];
+  for (int i = 0; i < 12; i++) {
+    preS[i] = in_R[ E[i]-1 ];  // extension E
+  }
+  for (int i = 0; i < 12; i++) {
+    preS[i] ^= K[i];           // work xor K
+  }
+  char postS[8];
+  s_transform(0, &preS[0], &postS[0]);
+  s_transform(1, &preS[6], &postS[4]);
+  for (int i = 0; i < 8; i++) {
+    out_R[i]  = postS[ P[i]-1 ];
+  }
+}
+
+void print_result(char* l, char* r, int num){
+  printf("L=");
+  for (int i = 0; i < num; i++) {
+    printf("%d", l[i]);
+  }
+  printf("\n");
+  printf("R=");
+  for (int i = 0; i < num; i++) {
+    printf("%d", r[i]);
+  }
+  printf("\n");
+}
+
 int main(int argc, char* argv[]) {
   char L[8];
   char R[8];
@@ -62,34 +91,15 @@ int main(int argc, char* argv[]) {
     L[i] = data[0][i];
     R[i] = data[1][i];
   }
-  char preS[12];
-  for (int i = 0; i < 12; i++) {
-    preS[i] = R[ E[i]-1 ];  // extension E
-  }
-  for (int i = 0; i < 12; i++) {
-    preS[i] ^= K[i];  // work xor K
-  }
-  char postS[8];
-  s_transform(0, &preS[0], &postS[0]);
-  s_transform(1, &preS[6], &postS[4]);
-  char postP[8];
+  char postF[8];
+  feistel_function(postF, R);
   for (int i = 0; i < 8; i++) {
-    postP[i]  = postS[ P[i]-1 ];
-    postP[i] ^= L[i];
+    postF[i] ^= L[i];
   }
   for (int i =0 ; i < 8 ; i++){
     char temp = R[i];
-    R[i] = postP[i];
+    R[i] = postF[i];
     L[i] = temp;
   }
-  printf("L=");
-  for (int i = 0; i < 8; i++) {
-    printf("%d", L[i]);
-  }
-  printf("\n");
-  printf("R=");
-  for (int i = 0; i < 8; i++) {
-    printf("%d", R[i]);
-  }
-  printf("\n");
+  print_result(L, R, 8);
 }
