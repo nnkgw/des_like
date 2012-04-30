@@ -65,17 +65,30 @@ void swap_array(char* l, char* r, int num) {
   }
 }
 
-void des_like(char* l, char* r, int num, eType type) {
-  char postF[8];
+void cbc_mode(char* l, char* r, char* iv) {
+  for (int i = 0; i < 8; i++) { 
+    l[i] ^= iv[i];
+    r[i] ^= iv[i+8];
+  }
+}
+
+void des_like(char* l, char* r, char* iv, int num, eType type, eMode mode) {
   if (type == eDecrypt) { swap_array(l, r, 8); }
+  else{ 
+    if (mode == eCBC){ cbc_mode(l, r, iv); }
+  }
+  char postF[8];
   feistel_function(postF, r);
   for (int i = 0; i < 8; i++) { postF[i] ^= l[i]; }
   for (int i = 0; i < 8; i++) { l[i] = postF[i];  }
   if (type == eEncrypt) { swap_array(l, r, 8); }
+  else{
+    if (mode == eCBC){ cbc_mode(l, r, iv); }
+  }
 }
 
-void read_vector_from_argv(char* vec, char* arg) {
-  for(int i = 0; i < 8; i++){
+void read_vector_from_argv(char* vec, char* arg, int num) {
+  for(int i = 0; i < num; i++){
     vec[i] = arg[i] - '0';
   }
 }
@@ -83,21 +96,21 @@ void read_vector_from_argv(char* vec, char* arg) {
 int main(int argc, char* argv[]) {
   char L[8];
   char R[8];
-  char IV[8];
+  char IV[16];
   eMode mode = eECB;
   if ((argc == 3)||(argc == 4)){
-    read_vector_from_argv(L, &argv[1][0]);
-    read_vector_from_argv(R, &argv[2][0]);
+    read_vector_from_argv(L, &argv[1][0], 8);
+    read_vector_from_argv(R, &argv[2][0], 8);
     if (argc == 4) { // optional
       if (strncmp(argv[3], "CBC:", 4) == 0){ mode = eCBC; }
-      if (mode != eECB){ read_vector_from_argv(IV, &argv[3][4]); }
+      if (mode != eECB){ read_vector_from_argv(IV, &argv[3][4], 16); }
     }
   }else{
-    printf("usage:\n  des_like 00000000 11111111 [CBC:01010101]\n");
+    printf("usage:\n  des_like 00000000 11111111 [CBC:1111111100000000]\n");
     exit(0);
   }
-  des_like(L, R, 8, eEncrypt);
+  des_like(L, R, IV, 8, eEncrypt, mode);
   print_result(L, R, 8, "Encrypt:");
-  des_like(L, R, 8, eDecrypt);
+  des_like(L, R, IV, 8, eDecrypt, mode);
   print_result(L, R, 8, "Decrypt:");
 }
