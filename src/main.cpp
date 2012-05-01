@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum eType {
+enum eOperation {
   eEncrypt,
   eDecrypt,
 };
@@ -72,8 +72,8 @@ void xor_iv(char* l, char* r, char* iv) {
   }
 }
 
-void des_like(char* l, char* r, char* iv, int num, eType type, eMode mode) {
-  if (type == eDecrypt) { swap_array(l, r, 8); }
+void des_like(char* l, char* r, char* iv, int num, eOperation op, eMode mode) {
+  if (op == eDecrypt) { swap_array(l, r, 8); }
   else{ 
     if ((mode == eCBC)||(mode == eCFB)) { xor_iv(l, r, iv); }
   }
@@ -81,7 +81,7 @@ void des_like(char* l, char* r, char* iv, int num, eType type, eMode mode) {
   feistel_function(postF, r);
   for (int i = 0; i < 8; i++) { postF[i] ^= l[i]; }
   for (int i = 0; i < 8; i++) { l[i] = postF[i];  }
-  if (type == eEncrypt) { swap_array(l, r, 8); }
+  if (op == eEncrypt) { swap_array(l, r, 8); }
   else{
     if ((mode == eCBC)||(mode == eCFB)) { xor_iv(l, r, iv); }
   }
