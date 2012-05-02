@@ -104,15 +104,23 @@ int main(int argc, char* argv[]) {
     if (argc == 4) { // optional
       if (strncmp(argv[3], "CBC:", 4) == 0){ mode = eCBC; }
       if (strncmp(argv[3], "CFB:", 4) == 0){ mode = eCFB; }
+      if (strncmp(argv[3], "OFB:", 4) == 0){ mode = eOFB; }
       if (mode != eECB){ read_vector_from_argv(IV, &argv[3][4], 16); }
     }
   }else{
     printf("usage:\n  des_like 00000000 11111111 [CBC:1111111100000000]\n");
     exit(0);
   }
-  if (mode == eCFB) { des_like(&IV[0], &IV[8], 0, 8, eEncrypt, eECB); }
-  des_like(L, R, IV, 8, eEncrypt, mode);
-  print_result(L, R, 8, "Encrypt:");
-  des_like(L, R, IV, 8, eDecrypt, mode);
-  print_result(L, R, 8, "Decrypt:");
+  if ((mode == eCFB)||(mode == eOFB)) { des_like(&IV[0], &IV[8], 0, 8, eEncrypt, eECB); }
+  if (mode == eOFB) {
+    xor_iv(L, R, IV);
+    print_result(L, R, 8, "Encrypt:");
+    xor_iv(L, R, IV);
+    print_result(L, R, 8, "Decrypt:");
+  }else{
+    des_like(L, R, IV, 8, eEncrypt, mode);
+    print_result(L, R, 8, "Encrypt:");
+    des_like(L, R, IV, 8, eDecrypt, mode);
+    print_result(L, R, 8, "Decrypt:");
+  }
 }
