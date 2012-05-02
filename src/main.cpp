@@ -117,6 +117,7 @@ int main(int argc, char* argv[]) {
     print_result(L, R, 8, "Encrypt:");
     xor_iv(L, R, IV);
     print_result(L, R, 8, "Decrypt:");
+    print_result(&IV[0], &IV[8], 8, "Random :");
   }else{
     des_like(L, R, IV, 8, eEncrypt, mode);
     print_result(L, R, 8, "Encrypt:");
