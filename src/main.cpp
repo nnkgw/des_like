@@ -75,7 +75,7 @@ void xor_iv(char* l, char* r, char* iv) {
 void des_like(char* l, char* r, char* iv, int num, eOperation op, eMode mode) {
   if (op == eDecrypt) { swap_array(l, r, 8); }
   else{ 
-    if ((mode == eCBC)||(mode == eCFB)) { xor_iv(l, r, iv); }
+    if (mode == eCBC) { xor_iv(l, r, iv); }
   }
   char postF[8];
   feistel_function(postF, r);
@@ -83,7 +83,7 @@ void des_like(char* l, char* r, char* iv, int num, eOperation op, eMode mode) {
   for (int i = 0; i < 8; i++) { l[i] = postF[i];  }
   if (op == eEncrypt) { swap_array(l, r, 8); }
   else{
-    if ((mode == eCBC)||(mode == eCFB)) { xor_iv(l, r, iv); }
+    if (mode == eCBC) { xor_iv(l, r, iv); }
   }
 }
 
@@ -112,12 +112,12 @@ int main(int argc, char* argv[]) {
     exit(0);
   }
   if ((mode == eCFB)||(mode == eOFB)) { des_like(&IV[0], &IV[8], 0, 8, eEncrypt, eECB); }
-  if (mode == eOFB) {
+  if ((mode == eOFB)||(mode == eCFB)) {
     xor_iv(L, R, IV);
     print_result(L, R, 8, "Encrypt:");
     xor_iv(L, R, IV);
     print_result(L, R, 8, "Decrypt:");
-    print_result(&IV[0], &IV[8], 8, "Random :");
+    if (mode == eOFB) { print_result(&IV[0], &IV[8], 8, "Random :"); }
   }else{
     des_like(L, R, IV, 8, eEncrypt, mode);
     print_result(L, R, 8, "Encrypt:");
